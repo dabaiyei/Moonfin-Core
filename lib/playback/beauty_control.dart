@@ -22,6 +22,7 @@ class BeautyControl {
   static int? windowsHandle;
   static String windowsBypassStatus = '';
   static bool windowsConfigured = false;
+  static final configurationChanged = ValueNotifier<int>(0);
   static final status = ValueNotifier<String>('waiting');
 
   static Map<String, dynamic> payload(UserPreferences prefs) => {
@@ -65,8 +66,13 @@ class BeautyControl {
         {...payload(prefs), if (license != null) 'license': license.toWire()},
       );
       if (result != null) {
-        if (PlatformDetection.isWindows)
-          windowsConfigured = result['configured'] == true;
+        if (PlatformDetection.isWindows) {
+          final configured = result['configured'] == true;
+          if (windowsConfigured != configured) {
+            windowsConfigured = configured;
+            configurationChanged.value++;
+          }
+        }
         acceptStatus(result);
       }
     } on PlatformException {

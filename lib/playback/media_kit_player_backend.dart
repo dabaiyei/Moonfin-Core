@@ -546,6 +546,9 @@ class MediaKitPlayerBackend extends PlayerBackend
       );
     }
     _prefs.addListener(_onPreferencesChanged);
+    if (PlatformDetection.isWindows) {
+      BeautyControl.configurationChanged.addListener(_onBeautyConfigurationChanged);
+    }
     _ccTracksSub = _player.stream.tracks.listen((_) {
       unawaited(_refreshEmbeddedCaptionTracks());
       unawaited(_retryPendingEmbeddedSubtitle());
@@ -1055,6 +1058,7 @@ class MediaKitPlayerBackend extends PlayerBackend
       : _prefs.get(UserPreferences.videoRenderer);
 
   int? _beautyHandle;
+  void _onBeautyConfigurationChanged() => unawaited(_syncWindowsBeauty());
   bool _syncingBeauty = false;
   bool _beautySyncQueued = false;
   Future<void> _syncWindowsBeauty() async {
@@ -3173,6 +3177,9 @@ class MediaKitPlayerBackend extends PlayerBackend
     _pendingEmbeddedSubtitle = null;
     _letterboxCropper.cancel();
     _prefs.removeListener(_onPreferencesChanged);
+    if (PlatformDetection.isWindows) {
+      BeautyControl.configurationChanged.removeListener(_onBeautyConfigurationChanged);
+    }
     if (PlatformDetection.isWindows &&
         _beautyHandle != null &&
         BeautyControl.windowsHandle == _beautyHandle) {

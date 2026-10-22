@@ -35,7 +35,15 @@ class BeautyLicenseStore {
   static Future<BeautyLicense?> _read() async {
     final value = await _storage.read(key: _key);
     if (value == null) return null;
-    final map = jsonDecode(value) as Map<String, dynamic>;
+    final map = jsonDecode(value);
+    if (map is! Map<String, dynamic> ||
+        [
+          'licenseToken',
+          'appId',
+          'appKey',
+        ].any((key) => map[key] != null && map[key] is! String)) {
+      throw const FormatException('Invalid beauty license record');
+    }
     return BeautyLicense(
       token: map['licenseToken'] as String? ?? '',
       appId: map['appId'] as String? ?? '',
