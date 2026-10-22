@@ -12,6 +12,7 @@ import '../preference/user_preferences.dart';
 import '../util/loggable_url.dart';
 import '../util/platform_detection.dart';
 
+import 'beauty_control.dart';
 import 'device_profile_builder.dart';
 import 'dolby_vision_av1.dart';
 import 'engine_trust.dart';
@@ -35,7 +36,13 @@ class AetherBackend implements PlayerBackend, SubtitleLoadingBackend {
     _syncAllowUntrustedTls();
     _prefs.addListener(_syncEngineLogForwarding);
     _syncEngineLogForwarding();
+    if (PlatformDetection.isIOS) {
+      _prefs.addListener(_syncBeauty);
+      _syncBeauty();
+    }
   }
+
+  void _syncBeauty() => unawaited(BeautyControl.apply(_prefs));
 
   static const _control = MethodChannel('moonfin/ios_aether_control');
   static const _events = EventChannel('moonfin/ios_aether_events');
@@ -301,6 +308,7 @@ class AetherBackend implements PlayerBackend, SubtitleLoadingBackend {
     });
 
     _liveSeekWindow = null;
+    if (PlatformDetection.isIOS) await BeautyControl.apply(_prefs);
     await _invoke<void>('setSource', {
       'url': url,
       'headers': headers,
@@ -767,6 +775,7 @@ class AetherBackend implements PlayerBackend, SubtitleLoadingBackend {
     _disposed = true;
     _prefs.removeListener(_syncAllowUntrustedTls);
     _prefs.removeListener(_syncEngineLogForwarding);
+    if (PlatformDetection.isIOS) _prefs.removeListener(_syncBeauty);
     _audioDelayDebounce?.cancel();
     _stopStallWatchdog();
     _eventSub?.cancel();

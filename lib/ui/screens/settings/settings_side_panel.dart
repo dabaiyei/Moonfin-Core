@@ -106,6 +106,8 @@ import 'plugin_settings_screen.dart';
 import 'ratings_config_screen.dart';
 import 'seerr_config_screen.dart';
 import 'settings_app_bar.dart';
+import 'beauty_settings_screen.dart';
+import '../../../l10n/beauty_labels.dart';
 import 'subtitle_customization_screen.dart';
 import 'subtitle_settings_screen.dart';
 import '../../../preference/detail_metadata_layout.dart';

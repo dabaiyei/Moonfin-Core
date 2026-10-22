@@ -260,11 +260,10 @@ dependency_overrides:
   # The pinned commit sits ahead of the published release, so it also carries
   # unreleased upstream work on the Apple and Dart sides. Re-check those builds
   # when moving the ref, and drop this once the fix reaches a published version.
+  # Local fork retains the pinned upstream renderer fixes and adds the
+  # Windows Facebetter frame processor. See packages/media_kit_video/MOONFIN.md.
   media_kit_video:
-    git:
-      url: https://github.com/RadicalMuffinMan/media-kit.git
-      path: media_kit_video
-      ref: 50013aee7429633ae2df656982167ca6d21237ce
+    path: packages/media_kit_video
   synchronized: 3.3.1
   wakelock_plus: 1.3.3
   screen_brightness_android: 2.1.3

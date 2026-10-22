@@ -1,0 +1,8 @@
+# Copy to facebetter.local.cmake (ignored by Git), then rebuild the app.
+# Extract facebetter-sdk-2.1.1-windows-x64.zip to windows/facebetter-sdk,
+# or uncomment the following override. Use forward slashes in paths.
+# set(FACEBETTER_SDK_DIR "D:/SDKs/facebetter")
+set(FACEBETTER_LICENSE_TOKEN "")
+# Online auth alternative:
+set(FACEBETTER_APP_ID "")
+set(FACEBETTER_APP_KEY "")

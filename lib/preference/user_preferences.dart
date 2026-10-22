@@ -2167,6 +2167,14 @@ class UserPreferences extends ChangeNotifier {
     defaultValue: true,
   );
 
+  static final beautyEnabled = Preference(key: 'facebetter_enabled', defaultValue: false);
+  static final beautySmoothing = Preference(key: 'facebetter_smoothing', defaultValue: 35);
+  static final beautyWhitening = Preference(key: 'facebetter_whitening', defaultValue: 20);
+  static final beautyRosiness = Preference(key: 'facebetter_rosiness', defaultValue: 10);
+  static final beautySharpening = Preference(key: 'facebetter_sharpening', defaultValue: 15);
+  static final beautyFaceThin = Preference(key: 'facebetter_face_thin', defaultValue: 0);
+  static final beautyEyeSize = Preference(key: 'facebetter_eye_size', defaultValue: 0);
+
   static final media3MapDolbyVisionProfile7ToHevc = Preference(
     key: 'media3_map_dolby_vision_profile7_to_hevc',
     defaultValue: false,

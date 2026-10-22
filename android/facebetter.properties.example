@@ -1,0 +1,8 @@
+# Copy to facebetter.properties (ignored by Git), then rebuild the APK.
+# Bind the installed application's package name in the Facebetter console.
+# Prefer a native offline license for a self-contained build. JSON responses
+# and short-lived tokens are accepted too, but expire according to their grant.
+FACEBETTER_LICENSE_TOKEN=
+# Alternatively configure online authentication (both fields required).
+FACEBETTER_APP_ID=
+FACEBETTER_APP_KEY=

@@ -328,6 +328,9 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
         engine.$currentAVPlayer
             .receive(on: DispatchQueue.main)
             .sink { [weak self] player in
+                #if os(iOS)
+                    FacebetterVideoBeauty.shared.bind(player)
+                #endif
                 guard let self, Self.drivesNowPlaying, !self.isAudioOnlySession else {
                     return
                 }

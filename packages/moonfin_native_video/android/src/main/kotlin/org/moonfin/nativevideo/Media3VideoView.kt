@@ -913,6 +913,10 @@ class Media3VideoView(
     private var lastAudioTrackMapping: List<Map<String, Any?>>? = null
 
     private var player: ExoPlayer
+    private val facebetterEffect = FacebetterEffect()
+    private var beautyAttached = false
+    private var beautyBypassReason: String? = null
+    private var beautySourceRange = ""
 
     // The pieces createPlayer hands the player, kept so a source tree built
     // later loads and parses exactly the way the player's own factory would.
@@ -1368,6 +1372,22 @@ class Media3VideoView(
             format: Format,
             decoderReuseEvaluation: DecoderReuseEvaluation?,
         ) {
+            val hdr = format.colorInfo?.colorTransfer.let {
+                it == C.COLOR_TRANSFER_ST2084 || it == C.COLOR_TRANSFER_HLG
+            } || format.sampleMimeType == "video/dolby-vision"
+            val beautyReason = FacebetterVideoPolicy.bypassReason(
+                format.width, format.height,
+                if (hdr) "HDR" else beautySourceRange,
+                format.frameRate.takeIf { it > 0f } ?: sourceFrameRateHint,
+            )
+            if (beautyReason != beautyBypassReason) {
+                mainHandler.post {
+                    if (!isDisposed && !isPlayerReleased) {
+                        beautyBypassReason = beautyReason
+                        updateBeautyEffects()
+                    }
+                }
+            }
             val frameRate = resolveSelectedVideoFrameRate() ?: format.frameRate
             if (frameRate.isFinite() && frameRate > 0f) {
                 maybeApplyFrameRateSwitching(frameRate)
@@ -2015,6 +2035,8 @@ class Media3VideoView(
             .setPauseAtEndOfMediaItems(false)
             .build()
             .also {
+                beautyAttached = shouldAttachBeauty()
+                it.setVideoEffects(if (beautyAttached) listOf(facebetterEffect) else emptyList())
                 attachAssOverlay(assHandler)
                 // init() sets up the handler's looper and registers it as a
                 // listener. Its callbacks reach libass unlocked, so the
@@ -2034,6 +2056,23 @@ class Media3VideoView(
                 // The MediaSession attaches lazily in setSource() so muted
                 // previews never create one.
             }
+    }
+
+    private fun shouldAttachBeauty(): Boolean =
+        FacebetterRuntime.shouldAttach(role) && currentMediaType != "audio" &&
+            !currentIsPreview && beautyBypassReason == null
+
+    fun updateBeautyEffects() {
+        if (isDisposed || isPlayerReleased) return
+        if (FacebetterRuntime.shouldAttach(role)) {
+            beautyBypassReason?.let { FacebetterRuntime.report(it) }
+        }
+        val attach = shouldAttachBeauty()
+        if (beautyAttached == attach) return
+        beautyAttached = attach
+        // Tunneling bypasses the GL effects processor entirely.
+        applyTrackSelectorForCurrentSource()
+        player.setVideoEffects(if (attach) listOf(facebetterEffect) else emptyList())
     }
 
     private fun registerAssFonts(assHandler: AssHandler) {
@@ -2602,6 +2641,12 @@ class Media3VideoView(
         val isPreview = args["preview"] as? Boolean ?: false
 
         currentMediaType = nextMediaType
+        currentIsPreview = isPreview
+        val range = args["videoRangeType"]?.toString()?.lowercase().orEmpty()
+        beautySourceRange = range
+        beautyBypassReason = FacebetterVideoPolicy.bypassReason(
+            sourceVideoWidthHint, sourceVideoHeightHint, range, sourceFrameRateHint,
+        )
         // Seed losslessness from the source's default audio stream so the
         // very first track selection already avoids tunneling for TrueHD/MLP.
         // onAudioInputFormatChanged keeps it current across track switches.
@@ -2632,6 +2677,7 @@ class Media3VideoView(
             ?.takeIf { it.isNotEmpty() }
         currentIsLive = args["isLive"] as? Boolean ?: false
         currentIsPreview = isPreview
+        updateBeautyEffects()
         audioOffloadRetryAttemptedForCurrentSource = false
         stereoDownmixRetryAttemptedForCurrentSource = false
         tunnelingRetryAttemptedForCurrentSource = false
@@ -3094,6 +3140,7 @@ class Media3VideoView(
             !isAudioContent &&
                 !hasExternalSubtitle &&
                 !sessionTunnelingDisabled &&
+                !beautyAttached &&
                 // Tunneled TrueHD/MLP passthrough can be silent with no sink
                 // exception on some AVR chains. Tunneling is only a latency
                 // optimization, so drop it whenever a lossless track is active.

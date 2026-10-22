@@ -32,6 +32,7 @@ target 'Runner' do
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   pod 'google-cast-sdk-no-bluetooth-xcframework', '~> 4.8.0'
+  pod 'Facebetter', '2.1.1'
   # Native libretro game playback. The cores it embeds are provisioned into
   # game_host/cores by build-ios.sh before pod install.
   pod 'libretro_host', :path => '../native/libretro_host'

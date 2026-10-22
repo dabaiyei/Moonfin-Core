@@ -329,6 +329,18 @@ object Media3Bridge {
             return
         }
 
+        if (call.method == "getBeautyStatus") {
+            result.success(FacebetterRuntime.snapshot())
+            return
+        }
+
+        if (call.method == "setBeautyPreferences") {
+            FacebetterRuntime.update(call.arguments as? Map<*, *> ?: emptyMap<Any, Any>())
+            activeView?.updateBeautyEffects()
+            result.success(FacebetterRuntime.snapshot())
+            return
+        }
+
         if (call.method == "setDecoderPreferences") {
             val args = call.arguments as? Map<*, *>
             preferFfmpegDecoder = args?.get("preferFfmpeg") as? Boolean ?: false

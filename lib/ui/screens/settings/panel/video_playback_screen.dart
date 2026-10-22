@@ -11,6 +11,12 @@ class _VideoPlaybackScreen extends StatelessWidget {
       appBar: buildSettingsAppBar(context, Text(l10n.player)),
       body: ListView(
         children: [
+          if (PlatformDetection.isAndroid || PlatformDetection.isWindows || PlatformDetection.isIOS)
+            _TvSettingsListTile(
+              leading: const Icon(Icons.face_retouching_natural),
+              title: Text(BeautyLabels.of(context).title),
+              onTap: () => context.pushSettingsScreen(const BeautySettingsScreen()),
+            ),
           const _SectionHeader('Media Player Behavior'),
           adaptiveListSection(
             children: [

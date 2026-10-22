@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+        FB2026102200000000000001 /* FacebetterVideoBeauty.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB2026102200000000000002 /* FacebetterVideoBeauty.swift */; };
 		07F1CDA4ECBF4656F8943FA1 /* AetherVideoPlatformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE376066E6B335EECE92FE9D /* AetherVideoPlatformView.swift */; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		1A2B3C4D5E6F708190A1B2C3 /* DlnaController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F708190A1B2C4 /* DlnaController.swift */; };
@@ -67,6 +68,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+        FB2026102200000000000002 /* FacebetterVideoBeauty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FacebetterVideoBeauty.swift; sourceTree = "<group>"; };
 		03952BAF79509CCED4C39448 /* EngineTrustPolicy.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EngineTrustPolicy.swift; path = ../../../tvos/Runner/Playback/Aether/EngineTrustPolicy.swift; sourceTree = "<group>"; };
 		63C420A016E390AD1852E5F9 /* ClientIdentityStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ClientIdentityStore.swift; path = ../../../tvos/Runner/Playback/Aether/ClientIdentityStore.swift; sourceTree = "<group>"; };
 		5E54071C7791340176AAD4CE /* MoonfinURLSession.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MoonfinURLSession.swift; path = ../../../tvos/Runner/Playback/Aether/MoonfinURLSession.swift; sourceTree = "<group>"; };
@@ -163,6 +165,7 @@
 		6DC43164854A34186EA1EF73 /* Playback */ = {
 			isa = PBXGroup;
 			children = (
+                FB2026102200000000000002 /* FacebetterVideoBeauty.swift */,
 				AE376066E6B335EECE92FE9D /* AetherVideoPlatformView.swift */,
 				622D533548193A6965CFC5B2 /* IosPiPController.swift */,
 				7C182E5551362E126A18C153 /* AetherPlayerWrapper.swift */,
@@ -278,6 +281,7 @@
 				97C146EA1CF9000F007C117D /* Sources */,
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
+                FB2026102200000000000003 /* Facebetter license configuration */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				C1CF9190255FFF657BC5FA23 /* [CP] Embed Pods Frameworks */,
@@ -364,6 +368,18 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+        FB2026102200000000000003 /* Facebetter license configuration */ = {
+            isa = PBXShellScriptBuildPhase;
+            alwaysOutOfDate = 1;
+            buildActionMask = 2147483647;
+            files = ();
+            inputPaths = ();
+            outputPaths = ("$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/FacebetterConfig.plist",);
+            name = "Facebetter license configuration";
+            runOnlyForDeploymentPostprocessing = 0;
+            shellPath = /bin/sh;
+            shellScript = "set -eu\nconfig=\"$PROJECT_DIR/FacebetterConfig.plist\"\nif [ ! -f \"$config\" ]; then config=\"$PROJECT_DIR/FacebetterConfig.plist.example\"; fi\nmkdir -p \"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH\"\ncp \"$config\" \"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/FacebetterConfig.plist\"\n";
+        };
 		0CB58F63F4A190A467A15797 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -497,6 +513,7 @@
 				1A2B3C4D5E6F708190A1B2D3 /* CarPlaySceneDelegate.swift in Sources */,
 				1A2B3C4D5E6F708190A1B2D5 /* CarPlayBridge.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
+                FB2026102200000000000001 /* FacebetterVideoBeauty.swift in Sources */,
 				07F1CDA4ECBF4656F8943FA1 /* AetherVideoPlatformView.swift in Sources */,
 				94ECEDAA66F50723EBC0F95D /* IosPiPController.swift in Sources */,
 				4BC24797D4BCA1F85446ABC9 /* AetherPlayerWrapper.swift in Sources */,

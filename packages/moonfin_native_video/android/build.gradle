@@ -31,6 +31,16 @@ apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 apply plugin: "org.jetbrains.kotlin.plugin.compose"
 
+// Private per-build credentials; never store these in synced user preferences.
+def facebetterProperties = new Properties()
+def facebetterFile = rootProject.file("facebetter.properties")
+if (facebetterFile.exists()) {
+    facebetterFile.withInputStream { facebetterProperties.load(it) }
+}
+def facebetterValue = { key ->
+    groovy.json.JsonOutput.toJson(System.getenv(key) ?: facebetterProperties.getProperty(key, ""))
+}
+
 android {
     namespace "org.moonfin.nativevideo"
     compileSdk 36
@@ -51,10 +61,14 @@ android {
 
     buildFeatures {
         compose true
+        buildConfig true
     }
 
     defaultConfig {
-        minSdk 21
+        minSdk 24
+        buildConfigField "String", "FACEBETTER_LICENSE_TOKEN", facebetterValue("FACEBETTER_LICENSE_TOKEN")
+        buildConfigField "String", "FACEBETTER_APP_ID", facebetterValue("FACEBETTER_APP_ID")
+        buildConfigField "String", "FACEBETTER_APP_KEY", facebetterValue("FACEBETTER_APP_KEY")
         consumerProguardFiles "consumer-rules.pro"
     }
 
@@ -101,6 +115,8 @@ dependencies {
     implementation("androidx.media3:media3-datasource:1.10.1")
     implementation("androidx.media3:media3-extractor:1.10.1")
     implementation("androidx.media3:media3-transformer:1.10.1")
+    implementation("androidx.media3:media3-effect:1.10.1")
+    implementation("net.pixpark:facebetter:2.1.1")
     // dav1d (AV1) software decoder, unpacked from its .aar into a plain .jar +
     // src/main/jniLibs. A library module cannot bundle a direct local .aar
     // dependency into its own AAR (AGP "hasLocalAarDeps" error), but a local

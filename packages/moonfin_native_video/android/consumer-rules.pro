@@ -17,3 +17,6 @@
 -keep class androidx.media3.decoder.av1.Dav1dDecoder {
   *;
 }
+
+# Facebetter calls Java callbacks and frame accessors from its native library.
+-keep class net.pixpark.facebetter.** { *; }

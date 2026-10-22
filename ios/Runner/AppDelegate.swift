@@ -345,6 +345,7 @@ private final class NativeAirPlayEventStreamHandler: NSObject, FlutterStreamHand
       // surface factory, and PiP (which owns the org.moonfin.ios/pip channel).
       let aetherChannel = AetherVideoChannel(messenger: messenger)
       self.aetherVideoChannel = aetherChannel
+      FacebetterVideoBeauty.shared.register(messenger: messenger)
       self.pipController = IosPiPController(
         messenger: messenger,
         wrapper: aetherChannel.player,

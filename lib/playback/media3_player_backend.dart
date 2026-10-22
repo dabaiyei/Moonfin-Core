@@ -14,6 +14,7 @@ import '../util/platform_detection.dart';
 import 'device_profile_builder.dart';
 import 'known_defects.dart';
 import 'media3_letterbox_crop.dart';
+import 'beauty_control.dart';
 import 'server_transcode_capabilities.dart';
 
 class Media3PlayerBackend extends PlayerBackend
@@ -251,6 +252,9 @@ class Media3PlayerBackend extends PlayerBackend
     final eventType = map['event']?.toString();
 
     switch (eventType) {
+      case 'beautyStatus':
+        BeautyControl.acceptStatus(map);
+        break;
       case 'state':
         final reported = Duration(milliseconds: _toInt(map['positionMs']));
         // Its duration and play state are the previous item's too: taken
@@ -1114,6 +1118,8 @@ class Media3PlayerBackend extends PlayerBackend
 
     await _ensureActivityStarted();
 
+    await BeautyControl.apply(_prefs);
+
     // The probes behind this only exist on the device, so a report has to say
     // what they resolved to or the handling of a P7 file can't be explained.
     final doviMode = doviCompatMode(_prefs);
@@ -1676,6 +1682,7 @@ class Media3PlayerBackend extends PlayerBackend
 
   void _onPreferencesChanged() {
     if (_disposed) return;
+    unawaited(BeautyControl.apply(_prefs));
     unawaited(_configureLetterboxCropper());
   }
 

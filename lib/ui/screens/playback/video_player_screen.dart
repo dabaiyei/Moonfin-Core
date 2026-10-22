@@ -37,6 +37,8 @@ import '../../widgets/playback/trickplay_tile_image.dart';
 import '../../../playback/html_video_backend.dart';
 import '../../../playback/aether_backend.dart';
 import '../../../playback/media_kit_player_backend.dart';
+import '../../../l10n/beauty_labels.dart';
+import '../settings/beauty_settings_screen.dart';
 import '../../../playback/mpv_letterbox_crop.dart';
 import '../../widgets/aether_video_view.dart';
 import '../../../playback/playback_lifecycle_handler.dart';
@@ -6062,6 +6064,25 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
                       shortcut: _recropShortcutLabel(l10n),
                     )
                   : l10n.playerZoomMode,
+            ),
+          if ((_activeMedia3Backend != null || PlatformDetection.isWindows || PlatformDetection.isIOS) && shows(OsdButton.beauty))
+            OsdButton.beauty: _controlButton(
+              Icons.face_retouching_natural,
+              onPressed: () async {
+                await showStyledPlayerDialog<void>(
+                  context,
+                  title: BeautyLabels.of(context).title,
+                  maxWidth: 460,
+                  builder: (context) => SizedBox(
+                    height: (MediaQuery.sizeOf(context).height * 0.65).clamp(180.0, 480.0).toDouble(),
+                    child: const BeautySettingsPanel(),
+                  ),
+                );
+                if (mounted) _showControls();
+              },
+              size: secondaryIconSize,
+              extent: secondaryExtent,
+              tooltip: BeautyLabels.of(context).title,
             ),
           if (PlatformDetection.isMobile && shows(OsdButton.orientation))
             OsdButton.orientation: _controlButton(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../l10n/beauty_labels.dart';
 import '../../../preference/button_layout.dart';
 import '../../../preference/user_preferences.dart';
 import '../../../util/platform_detection.dart';
@@ -26,6 +27,7 @@ enum OsdButton {
   castControls('castControls'),
   volume('volume'),
   quality('quality'),
+  beauty('beauty'),
   zoom('zoom'),
   orientation('orientation'),
   info('info'),
@@ -40,6 +42,7 @@ enum OsdButton {
   /// never gets drawn here isn't worth offering a switch for.
   bool get isOffered => switch (this) {
     OsdButton.castControls => false,
+    OsdButton.beauty => PlatformDetection.isAndroid || PlatformDetection.isWindows || PlatformDetection.isIOS,
     OsdButton.cast => !PlatformDetection.isTV,
     OsdButton.volume => PlatformDetection.useDesktopUi,
     OsdButton.orientation => PlatformDetection.isMobile,
@@ -62,6 +65,7 @@ enum OsdButton {
     OsdButton.castControls => Icons.cast_connected,
     OsdButton.volume => Icons.volume_up_rounded,
     OsdButton.quality => Icons.video_settings_outlined,
+    OsdButton.beauty => Icons.face_retouching_natural,
     OsdButton.zoom => Icons.zoom_out_map,
     OsdButton.orientation => Icons.screen_rotation_outlined,
     OsdButton.info => Icons.info_outline_rounded,
@@ -82,6 +86,7 @@ enum OsdButton {
     OsdButton.castControls => l10n.playerTooltipCastControls,
     OsdButton.volume => l10n.playerTooltipVolume,
     OsdButton.quality => l10n.playerTooltipPlaybackQuality,
+    OsdButton.beauty => BeautyLabels(l10n.localeName).title,
     OsdButton.zoom => l10n.playerZoomMode,
     OsdButton.orientation => l10n.orientationLock,
     OsdButton.info => l10n.playbackInformation,

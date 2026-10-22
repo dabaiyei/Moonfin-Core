@@ -13,6 +13,7 @@ import '../preference/preference_constants.dart';
 import '../preference/user_preferences.dart';
 import '../util/auto_hdr_switcher.dart';
 import '../util/platform_detection.dart';
+import 'beauty_control.dart';
 import 'device_profile_builder.dart';
 import 'hdr_output_controller.dart';
 import 'known_defects.dart';
@@ -797,6 +798,13 @@ class MediaKitPlayerBackend extends PlayerBackend
         (await _liveStartupObserverReady);
     if (!_ownsPlayback(generation)) return;
 
+    if (PlatformDetection.isWindows && payload['preview'] != true) {
+      _beautyHandle = await _player.handle;
+      if (!_ownsPlayback(generation)) return;
+      BeautyControl.windowsHandle = _beautyHandle;
+      BeautyControl.windowsBypassStatus = '';
+      await BeautyControl.apply(_prefs);
+    }
     await _notifyNativeHandleReady();
     await _configureAppleMobileLibassFont();
     await _configureAndroidLibassFonts();
@@ -915,7 +923,7 @@ class MediaKitPlayerBackend extends PlayerBackend
         await _queueNativeRelease(_standDownNativeWindow);
       }
     }
-    final renderer = _prefs.get(UserPreferences.videoRenderer);
+    final renderer = _effectiveVideoRenderer;
     // Once per title: a passing params event that reads SDR mid-playback must
     // not tear the window down and build it again.
     if (hdrOutput.isEngaged &&
@@ -965,7 +973,7 @@ class MediaKitPlayerBackend extends PlayerBackend
     // engaged, and land on the window after this title has opened.
     await hdrOutput.settled;
 
-    final renderer = _prefs.get(UserPreferences.videoRenderer);
+    final renderer = _effectiveVideoRenderer;
     final serverHdr = isHdrRangeType(payload['videoRangeType']?.toString());
     if (!renderer.usesNativeWindow(isHdr: serverHdr)) {
       // A title after one that engaged in the same screen starts on the
@@ -1039,17 +1047,55 @@ class MediaKitPlayerBackend extends PlayerBackend
   /// Cheap when nothing changed: the controller refuses without a presenter,
   /// and a failed session is not revisited. An engaged one is only until its
   /// renderer is confirmed and its hand-back check has run.
+  VideoRenderer get _effectiveVideoRenderer =>
+      PlatformDetection.isWindows &&
+          BeautyControl.windowsConfigured &&
+          _prefs.get(UserPreferences.beautyEnabled)
+      ? VideoRenderer.nativeHdrOnly
+      : _prefs.get(UserPreferences.videoRenderer);
+
+  int? _beautyHandle;
+  bool _syncingBeauty = false;
+  bool _beautySyncQueued = false;
+  Future<void> _syncWindowsBeauty() async {
+    if (!PlatformDetection.isWindows ||
+        _isDisposed ||
+        _beautyHandle == null ||
+        BeautyControl.windowsHandle != _beautyHandle) {
+      return;
+    }
+    if (_syncingBeauty) {
+      _beautySyncQueued = true;
+      return;
+    }
+    _syncingBeauty = true;
+    try {
+      do {
+        _beautySyncQueued = false;
+        BeautyControl.windowsBypassStatus = isPlayingHdrContent ? 'bypassHdr' : '';
+        await BeautyControl.apply(_prefs);
+        if (_isDisposed) return;
+        // Enabling during SDR playback releases mpv's native window and
+        // restores the plugin texture that owns the frame processor.
+        _handBackChecked = false;
+        await _maybeEngageNativeHdr();
+      } while (_beautySyncQueued && !_isDisposed);
+    } finally {
+      _syncingBeauty = false;
+    }
+  }
+
   void _onVideoParams(VideoParams params) {
     final loaded = params.gamma != null || params.primaries != null;
     _decodedVideoParams = loaded ? params : null;
+    if (loaded && PlatformDetection.isWindows) unawaited(_syncWindowsBeauty());
     if (!loaded || !PlatformDetection.supportsNativeHdrWindow) return;
     final status = hdrOutput.status.value;
     final engagedCheckDue =
         status.isActive &&
         (_voVerificationPending ||
             (!_handBackChecked &&
-                _prefs.get(UserPreferences.videoRenderer) !=
-                    VideoRenderer.nativeWindow));
+                _effectiveVideoRenderer != VideoRenderer.nativeWindow));
     if (!status.isRevisitable && !engagedCheckDue) return;
     unawaited(_maybeEngageNativeHdr());
   }
@@ -1806,6 +1852,7 @@ class MediaKitPlayerBackend extends PlayerBackend
     }
 
     unawaited(_configureLetterboxCropper());
+    unawaited(_syncWindowsBeauty());
 
     if (_audioPassthroughApplyInProgress) {
       _audioPassthroughApplyQueued = true;
@@ -3126,6 +3173,13 @@ class MediaKitPlayerBackend extends PlayerBackend
     _pendingEmbeddedSubtitle = null;
     _letterboxCropper.cancel();
     _prefs.removeListener(_onPreferencesChanged);
+    if (PlatformDetection.isWindows &&
+        _beautyHandle != null &&
+        BeautyControl.windowsHandle == _beautyHandle) {
+      BeautyControl.windowsHandle = null;
+      BeautyControl.windowsBypassStatus = '';
+      unawaited(BeautyControl.apply(_prefs));
+    }
     _ccTracksSub?.cancel();
     _videoParamsSub?.cancel();
     _tracksChangedController.close();

@@ -1145,11 +1145,9 @@ packages:
   media_kit_video:
     dependency: "direct main"
     description:
-      path: media_kit_video
-      ref: "50013aee7429633ae2df656982167ca6d21237ce"
-      resolved-ref: "50013aee7429633ae2df656982167ca6d21237ce"
-      url: "https://github.com/RadicalMuffinMan/media-kit.git"
-    source: git
+      path: "packages/media_kit_video"
+      relative: true
+    source: path
     version: "2.0.1"
   meta:
     dependency: transitive
