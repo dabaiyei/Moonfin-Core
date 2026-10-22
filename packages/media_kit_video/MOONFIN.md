@@ -3,6 +3,9 @@ This local package is copied from RadicalMuffinMan/media-kit at
 The upstream MIT LICENSE is preserved. No examples or tests are vendored.
 
 Moonfin changes:
+- Include the shared `common/darwin` sources and CocoaPods helpers. Materialize
+  upstream Apple Swift symlinks as source copies so ZIP imports and Windows
+  checkouts remain compilable. Refresh these copies when updating upstream.
 - Remove `resolution: workspace` for use as a local path dependency.
 - Add an optional Windows Facebetter 2.1.1 processor and method channel.
 - In hardware rendering, read back the actual ANGLE presentation framebuffer,
