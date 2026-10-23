@@ -88,7 +88,7 @@ final class FacebetterVideoBeauty {
                 let descriptions = try await track.load(.formatDescriptions)
                 guard self.generation == token, self.item === item else { return }
                 for description in descriptions {
-                    let extensions = CMFormatDescriptionGetExtensions(description) as NSDictionary
+                    let extensions = (CMFormatDescriptionGetExtensions(description) as NSDictionary?) ?? NSDictionary()
                     let transfer = extensions[kCMFormatDescriptionExtension_TransferFunction] as? String ?? ""
                     let primaries = extensions[kCMFormatDescriptionExtension_ColorPrimaries] as? String ?? ""
                     let subtype = CMFormatDescriptionGetMediaSubType(description)

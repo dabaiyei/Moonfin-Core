@@ -1,7 +1,7 @@
 #pragma once
 
 #include <flutter/encodable_value.h>
-#include <mpv/client.h>
+#include <client.h>
 #include <memory>
 
 // Settings are published on the platform thread; each output owns its engine
