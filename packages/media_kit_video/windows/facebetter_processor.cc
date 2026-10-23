@@ -14,9 +14,18 @@
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
 #include <vector>
+#ifdef _MSC_VER
+// The SDK exports ImageFrame with a private std::shared_ptr member. Its DLL
+// interface warning is owned by the vendor; keep /WX for Moonfin's code.
+#pragma warning(push)
+#pragma warning(disable : 4251)
+#endif
 #include <facebetter/beauty_effect_engine.h>
 #include <facebetter/beauty_params.h>
 #include <facebetter/image_frame.h>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 #include "facebetter_config.h"
 #endif
 

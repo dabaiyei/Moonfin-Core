@@ -124,6 +124,17 @@ jobs:
 
       - name: Build
         run: |
+          # The desktop development defaults allow an 8 GB Gradle heap plus
+          # 4 GB metaspace. Bound CI usage so Flutter and native tools have room.
+          cat >> android/gradle.properties <<'EOF'
+
+          org.gradle.jvmargs=-Xmx4G -XX:MaxMetaspaceSize=1G -XX:ReservedCodeCacheSize=256m -XX:+HeapDumpOnOutOfMemoryError
+          org.gradle.workers.max=2
+          org.gradle.parallel=false
+          kotlin.compiler.execution.strategy=in-process
+          EOF
+          free -h
+          df -h .
           chmod +x build-android.sh
           ./build-android.sh ${{ matrix.target }}
 
