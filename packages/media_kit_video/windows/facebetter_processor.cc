@@ -12,7 +12,7 @@
 
 #ifdef MOONFIN_FACEBETTER
 #include <EGL/egl.h>
-#include <GLES3/gl3.h>
+#include <GLES2/gl2.h>
 #include <vector>
 #include <facebetter/beauty_effect_engine.h>
 #include <facebetter/beauty_params.h>
@@ -21,6 +21,21 @@
 #endif
 
 namespace {
+#ifdef MOONFIN_FACEBETTER
+// The bundled ANGLE SDK ships GLES2 headers. These ES3 state tokens are
+// queried only after the current context reports OpenGL ES 3 support;
+// all functions used here are already part of the GLES2 API.
+constexpr GLenum kPixelPackBuffer = 0x88EB;
+constexpr GLenum kPixelUnpackBuffer = 0x88EC;
+constexpr GLenum kPixelPackBufferBinding = 0x88ED;
+constexpr GLenum kPixelUnpackBufferBinding = 0x88EF;
+constexpr GLenum kPackRowLength = 0x0D02;
+constexpr GLenum kPackSkipRows = 0x0D03;
+constexpr GLenum kPackSkipPixels = 0x0D04;
+constexpr GLenum kUnpackRowLength = 0x0CF2;
+constexpr GLenum kUnpackSkipRows = 0x0CF3;
+constexpr GLenum kUnpackSkipPixels = 0x0CF4;
+#endif
 using flutter::EncodableMap;
 using flutter::EncodableValue;
 struct Settings {
@@ -123,23 +138,23 @@ void FacebetterProcessor::ProcessGL(mpv_handle* handle, int width, int height) {
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
   if (es3) {
-    glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING, &pack_buffer);
-    glGetIntegerv(GL_PACK_ROW_LENGTH, &pack_row);
-    glGetIntegerv(GL_PACK_SKIP_ROWS, &pack_rows);
-    glGetIntegerv(GL_PACK_SKIP_PIXELS, &pack_pixels);
-    glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-    glPixelStorei(GL_PACK_ROW_LENGTH, 0);
-    glPixelStorei(GL_PACK_SKIP_ROWS, 0);
-    glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
+    glGetIntegerv(kPixelPackBufferBinding, &pack_buffer);
+    glGetIntegerv(kPackRowLength, &pack_row);
+    glGetIntegerv(kPackSkipRows, &pack_rows);
+    glGetIntegerv(kPackSkipPixels, &pack_pixels);
+    glBindBuffer(kPixelPackBuffer, 0);
+    glPixelStorei(kPackRowLength, 0);
+    glPixelStorei(kPackSkipRows, 0);
+    glPixelStorei(kPackSkipPixels, 0);
   }
   impl_->rgba.resize(static_cast<size_t>(width) * height * 4);
   glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, impl_->rgba.data());
   const auto read_error = glGetError();
   if (es3) {
-    glBindBuffer(GL_PIXEL_PACK_BUFFER, pack_buffer);
-    glPixelStorei(GL_PACK_ROW_LENGTH, pack_row);
-    glPixelStorei(GL_PACK_SKIP_ROWS, pack_rows);
-    glPixelStorei(GL_PACK_SKIP_PIXELS, pack_pixels);
+    glBindBuffer(kPixelPackBuffer, pack_buffer);
+    glPixelStorei(kPackRowLength, pack_row);
+    glPixelStorei(kPackSkipRows, pack_rows);
+    glPixelStorei(kPackSkipPixels, pack_pixels);
   }
   glPixelStorei(GL_PACK_ALIGNMENT, pack);
   glBindFramebuffer(GL_FRAMEBUFFER, old_fbo);
@@ -170,14 +185,14 @@ void FacebetterProcessor::ProcessGL(mpv_handle* handle, int width, int height) {
   glGetIntegerv(GL_TEXTURE_BINDING_2D, &old_texture);
   glGetIntegerv(GL_UNPACK_ALIGNMENT, &unpack);
   if (es3) {
-    glGetIntegerv(GL_PIXEL_UNPACK_BUFFER_BINDING, &unpack_buffer);
-    glGetIntegerv(GL_UNPACK_ROW_LENGTH, &unpack_row);
-    glGetIntegerv(GL_UNPACK_SKIP_ROWS, &unpack_rows);
-    glGetIntegerv(GL_UNPACK_SKIP_PIXELS, &unpack_pixels);
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-    glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
-    glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+    glGetIntegerv(kPixelUnpackBufferBinding, &unpack_buffer);
+    glGetIntegerv(kUnpackRowLength, &unpack_row);
+    glGetIntegerv(kUnpackSkipRows, &unpack_rows);
+    glGetIntegerv(kUnpackSkipPixels, &unpack_pixels);
+    glBindBuffer(kPixelUnpackBuffer, 0);
+    glPixelStorei(kUnpackRowLength, 0);
+    glPixelStorei(kUnpackSkipRows, 0);
+    glPixelStorei(kUnpackSkipPixels, 0);
   }
   glGetIntegerv(GL_VIEWPORT, viewport);
   GLboolean color_mask[4];
@@ -248,10 +263,10 @@ void FacebetterProcessor::ProcessGL(mpv_handle* handle, int width, int height) {
   glActiveTexture(old_active);
   glPixelStorei(GL_UNPACK_ALIGNMENT, unpack);
   if (es3) {
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, unpack_buffer);
-    glPixelStorei(GL_UNPACK_ROW_LENGTH, unpack_row);
-    glPixelStorei(GL_UNPACK_SKIP_ROWS, unpack_rows);
-    glPixelStorei(GL_UNPACK_SKIP_PIXELS, unpack_pixels);
+    glBindBuffer(kPixelUnpackBuffer, unpack_buffer);
+    glPixelStorei(kUnpackRowLength, unpack_row);
+    glPixelStorei(kUnpackSkipRows, unpack_rows);
+    glPixelStorei(kUnpackSkipPixels, unpack_pixels);
   }
   glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
   glColorMask(color_mask[0], color_mask[1], color_mask[2], color_mask[3]);
